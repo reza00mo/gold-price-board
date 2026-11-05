@@ -1,4 +1,40 @@
+"use client"; // این خط برای ساعت زنده حیاتیه!
+
+import { useState, useEffect } from "react";
+
 export default function Home() {
+  // استیت‌ها برای نگهداری زمان فعلی
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+
+  // این بخش کد (useEffect) باعث میشه هر ثانیه ساعت آپدیت بشه
+  useEffect(() => {
+    setCurrentTime(new Date()); // زمان اولیه
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer); // پاکسازی تایمر موقع خارج شدن از صفحه
+  }, []);
+
+  // فرمت‌دهی ساعت به صورت ۲۴ ساعته
+  const formatTime = (date: Date) => {
+    return new Intl.DateTimeFormat("fa-IR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(date);
+  };
+
+  // فرمت‌دهی تاریخ به شمسی (روز هفته، روز، ماه، سال)
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat("fa-IR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
+  };
+
   const data = {
     gold18: 7245000,
     gold24: 9634000,
@@ -54,9 +90,20 @@ export default function Home() {
           قیمت آنلاین طلا
         </h2>
 
-        <div className="flex flex-col text-left font-mono text-yellow-500/80 text-xs md:text-sm" dir="ltr">
-          <span>🕒 21:00:32</span>
-          <span>📅 شنبه ۲۷ اردیبهشت ۱۴۰۴</span>
+        {/* بخش تاریخ و ساعت زنده */}
+        <div className="flex flex-col text-left font-mono text-yellow-500 text-sm md:text-base font-bold" dir="rtl">
+          {currentTime ? (
+            <>
+              <span>🕒 {formatTime(currentTime)}</span>
+              <span>📅 {formatDate(currentTime)}</span>
+            </>
+          ) : (
+            // یه حالت لودینگ ساده برای وقتی که هنوز ساعت لود نشده (جلوگیری از ارور Next.js)
+            <>
+              <span>🕒 --:--:--</span>
+              <span>📅 در حال بارگذاری...</span>
+            </>
+          )}
         </div>
       </header>
 
@@ -70,10 +117,8 @@ export default function Home() {
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> زنده
             </div>
             
-            {/* اسم (بالاتر رفت) */}
             <span className="text-yellow-500 text-sm md:text-lg font-bold mb-3 md:mb-4">{card.title}</span>
             
-            {/* عدد و آیکون (بالاتر رفت) */}
             <div className="flex items-center gap-2 mb-2 md:mb-3">
               <span className="text-2xl md:text-3xl">{card.icon}</span>
               <span className="text-2xl md:text-4xl font-bold text-white tracking-wider font-mono drop-shadow-md" dir="ltr">
@@ -81,7 +126,6 @@ export default function Home() {
               </span>
             </div>
             
-            {/* واحد (بزرگتر و خواناتر شد) */}
             <span className="text-yellow-500 text-xs md:text-base font-medium">{card.unit}</span>
           </div>
         ))}
@@ -91,8 +135,9 @@ export default function Home() {
       {/* نوار پایین */}
       <footer className="mt-4 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-400 border-t border-zinc-800 pt-3">
         <div className="flex items-center gap-2 mb-2 md:mb-0">
-          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-          <span>آخرین بروزرسانی: <strong className="text-yellow-500 font-mono text-sm">14:35</strong></span>
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          {/* زمان آخرین بروزرسانی رو هم داینامیک کردم */}
+          <span>آخرین بروزرسانی: <strong className="text-yellow-500 font-mono text-sm">{currentTime ? formatTime(currentTime) : "--:--:--"}</strong></span>
         </div>
         
         <div className="flex-grow text-center px-4 overflow-hidden">
